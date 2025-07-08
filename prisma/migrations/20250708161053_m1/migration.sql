@@ -11,7 +11,7 @@ CREATE TABLE "User" (
     "password" TEXT NOT NULL,
     "firstName" VARCHAR(30) NOT NULL,
     "lastName" VARCHAR(30) NOT NULL,
-    "profileURL" TEXT,
+    "profilePicture" TEXT,
     "profileType" "PROFILE_TYPE" NOT NULL DEFAULT 'PUBLIC',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,

@@ -8,20 +8,20 @@ datasource db {
 }
 
 model User {
-  id          String       @id @default(uuid())
-  username    String       @unique @db.VarChar(30)
-  password    String
-  firstName   String       @db.VarChar(30)
-  lastName    String       @db.VarChar(30)
-  profileURL  String?
-  posts       Post[]       @relation("My Posts")
-  comments    Comment[]
-  profileType PROFILE_TYPE @default(PUBLIC)
-  likedPosts  Post[]       @relation("Liked Posts")
-  following   Follow[]     @relation("Following")
-  followers   Follow[]     @relation("Follower")
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  id             String       @id @default(uuid())
+  username       String       @unique @db.VarChar(30)
+  password       String
+  firstName      String       @db.VarChar(30)
+  lastName       String       @db.VarChar(30)
+  profilePicture String?
+  posts          Post[]       @relation("My Posts")
+  comments       Comment[]
+  profileType    PROFILE_TYPE @default(PUBLIC)
+  likedPosts     Post[]       @relation("Liked Posts")
+  following      Follow[]     @relation("Following")
+  followers      Follow[]     @relation("Follower")
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
 }
 
 model Post {
