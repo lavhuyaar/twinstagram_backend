@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
-
-const JWT_SECRET_KEY: string = process.env.JWT_SECRET_KEY as string;
-
 import {
   validateLoginUser,
   validateRegisterUser,
 } from '../validators/authValidator';
 import { validationResult } from 'express-validator';
 import { createNewUser, getUserByUsername } from '../db/queries/authQueries';
+
+const JWT_SECRET_KEY: string | undefined = process.env.JWT_SECRET_KEY;
 
 export const registerUser = [
   ...validateRegisterUser,
@@ -90,6 +89,10 @@ export const loginUser = [
       return;
     }
 
+    if (!JWT_SECRET_KEY) {
+      throw new Error('JWT_SECRET_KEY not found!');
+    }
+
     //JWT Token
     const token: string = jwt.sign({ user }, JWT_SECRET_KEY, {
       expiresIn: '7 days', //Valid for 7 days
@@ -109,3 +112,18 @@ export const loginUser = [
       });
   },
 ];
+
+export const logoutUser = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  res
+    .status(200)
+    .clearCookie('token', {
+      httpOnly: true,
+    })
+    .json({ success: 'User logged out successfully!' });
+
+  return;
+};

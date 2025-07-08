@@ -1,7 +1,7 @@
 import request from 'supertest';
 import app from '../app';
-import { generateMockedUser } from '../utils/generateMockedUser';
 import db from '../db/db';
+import { generateMockedUser } from '../utils/generateMockedUser';
 
 describe('POST /v1/auth/register', () => {
   const mockedUser = generateMockedUser();
@@ -145,6 +145,51 @@ describe('POST /v1/auth/login', () => {
 
   // Deletes the registered mocked user
   afterAll(async () => {
+    await db.user.deleteMany({
+      where: {
+        username: mockedUser.username,
+      },
+    });
+  });
+});
+
+describe('POST /v1/auth/logout', () => {
+  const mockedUser = generateMockedUser();
+  let cookie: string;
+
+  beforeAll(async () => {
+    // Registers mocked user
+    await request(app).post('/v1/auth/register').send(mockedUser);
+
+    // Logs in the mocked user
+    const loginResponse = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: mockedUser.username, password: mockedUser.password });
+
+    // HTTP only Cookie with JWT Token
+    cookie = loginResponse.headers['set-cookie'];
+  });
+
+  it('should throw an error if user does not contain http cookie', async () => {
+    const response = await request(app).get('/v1/auth/logout');
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
+  it('should clear the http only cookie', async () => {
+    const response = await request(app)
+      .get('/v1/auth/logout')
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBe('User logged out successfully!');
+  });
+
+  afterAll(async () => {
+    // Deletes mocked user
     await db.user.deleteMany({
       where: {
         username: mockedUser.username,
