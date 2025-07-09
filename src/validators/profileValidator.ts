@@ -17,6 +17,11 @@ export const validateProfile = [
     .trim()
     .isLength({ min: 2, max: 30 })
     .withMessage('Username must be between 2 and 30 characters.'),
+  body('profileType')
+    .trim()
+    .isIn(['PUBLIC', 'PRIVATE'])
+    .withMessage('Profile type must be either public or private.'),
+
   body('profilePicture')
     .optional()
     .custom((_, { req }) => {

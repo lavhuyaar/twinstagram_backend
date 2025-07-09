@@ -18,6 +18,7 @@ export const updateUser = async (
   username: string,
   firstName: string,
   lastName: string,
+  profileType: 'PUBLIC' | 'PRIVATE',
   profilePicture?: string | null,
 ) => {
   const user = await db.user.update({
@@ -29,6 +30,7 @@ export const updateUser = async (
       firstName,
       lastName,
       profilePicture,
+      profileType,
     },
   });
 

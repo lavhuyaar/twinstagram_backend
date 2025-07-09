@@ -29,7 +29,8 @@ export const editProfile = [
 
     let profilePictureURL: string | null = null;
 
-    const { firstName, lastName, username, profilePicture } = req.body;
+    const { firstName, lastName, username, profilePicture, profileType } =
+      req.body;
     const pfpFile = req.file; //Image
 
     // If User uploads a profile picture
@@ -88,6 +89,7 @@ export const editProfile = [
       username,
       firstName,
       lastName,
+      profileType,
       profilePictureURL,
     );
 

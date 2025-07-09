@@ -31,6 +31,7 @@ describe('PUT /v1/profile', () => {
         username: 'EditedName',
         firstName: 'Edited',
         lastName: 'Name',
+        profileType: 'PUBLIC',
       })
       .set('Cookie', cookie);
 
@@ -45,6 +46,7 @@ describe('PUT /v1/profile', () => {
       .send({
         firstName: 'Edited',
         lastName: 'Name',
+        profileType: 'PRIVATE',
       })
       .set('Cookie', cookie);
 
@@ -60,6 +62,7 @@ describe('PUT /v1/profile', () => {
       .send({
         username: 'EditedName',
         lastName: 'Name',
+        profileType: 'PRIVATE',
       })
       .set('Cookie', cookie);
 
@@ -75,12 +78,29 @@ describe('PUT /v1/profile', () => {
       .send({
         username: 'EditedName',
         firstName: 'Edited',
+        profileType: 'PUBLIC',
       })
       .set('Cookie', cookie);
 
     expect(response.status).toBe(400);
     expect(response.body.errors[0].msg).toBe(
       'Last name must be between 2 and 30 characters.',
+    );
+  });
+
+  it('should throw an error when profileType is invalid', async () => {
+    const response = await request(app)
+      .put('/v1/profile')
+      .send({
+        username: 'EditedName',
+        firstName: 'Edited',
+        lastName: 'Name',
+      })
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(400);
+    expect(response.body.errors[0].msg).toBe(
+      'Profile type must be either public or private.',
     );
   });
 
