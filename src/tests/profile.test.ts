@@ -40,6 +40,20 @@ describe('PUT /v1/profile', () => {
     expect(response.body.user).toBeDefined();
   });
 
+  it('should throw an error if user does not send http cookie', async () => {
+    const response = await request(app).put('/v1/profile').send({
+      username: 'EditedName',
+      firstName: 'Edited',
+      lastName: 'Name',
+      profileType: 'PUBLIC',
+    });
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
   it('should throw an error when username is invalid', async () => {
     const response = await request(app)
       .put('/v1/profile')
