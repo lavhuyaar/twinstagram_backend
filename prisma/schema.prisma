@@ -30,6 +30,7 @@ model Post {
   userId    String
   content   String    @db.VarChar(2000)
   image     String?
+  imageId   String?
   comments  Comment[]
   likes     User[]    @relation("Liked Posts")
   createdAt DateTime  @default(now())

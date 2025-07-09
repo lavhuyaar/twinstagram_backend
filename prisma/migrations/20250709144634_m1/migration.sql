@@ -25,6 +25,7 @@ CREATE TABLE "Post" (
     "userId" TEXT NOT NULL,
     "content" VARCHAR(2000) NOT NULL,
     "image" TEXT,
+    "imageId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

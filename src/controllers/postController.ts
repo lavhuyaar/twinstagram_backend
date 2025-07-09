@@ -1,0 +1,78 @@
+import { NextFunction, Response } from 'express';
+import { decode } from 'base64-arraybuffer';
+import { v4 as uuidv4 } from 'uuid';
+import { CustomRequest } from '../types/CustomRequest';
+import { validatePost } from '../validators/postValidator';
+import { validationResult } from 'express-validator';
+import supabase from '../supabase/supabase';
+import { createNewPost } from '../db/queries/postQueries';
+
+export const newPost = [
+  ...validatePost,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const { userId } = req;
+
+    if (!userId) {
+      res.status(403).json({
+        error: 'Unauthorized Action!',
+      });
+      return;
+    }
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    let imageURL: string | null = null;
+    let imageId: string | null = null;
+
+    const { content } = req.body;
+    const imageFile = req.file; //Image
+
+    // If User uploads an image with post
+    if (imageFile) {
+      const fileBase64 = decode(imageFile.buffer.toString('base64'));
+
+      imageId = uuidv4(); //Unique imageId, would help in deleting the image from supabase when User deletes the post
+
+      // Adds post image in supabase
+      const { data, error } = await supabase.storage
+        .from('twinstagram')
+        .upload(`Post ${imageId}`, fileBase64, {
+          contentType: imageFile.mimetype,
+        });
+
+      if (error) {
+        console.error(error.message);
+        throw error;
+      }
+
+      // Gets public URL of uploaded image to store it in DB
+      const { data: image } = supabase.storage
+        .from('twinstagram')
+        .getPublicUrl(data.path);
+
+      imageURL = image.publicUrl; // Public URL
+    }
+
+    const post = await createNewPost(userId, content, imageURL, imageId);
+
+    if (!post) {
+      res.status(401).json({
+        error: 'Failed to create post!',
+      });
+      return;
+    }
+
+    res.status(201).json({
+      post,
+      success: 'Post created successfully!',
+    });
+    return;
+  },
+];
