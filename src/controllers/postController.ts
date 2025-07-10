@@ -5,7 +5,7 @@ import { CustomRequest } from '../types/CustomRequest';
 import { validatePost } from '../validators/postValidator';
 import { validationResult } from 'express-validator';
 import supabase from '../supabase/supabase';
-import { createNewPost } from '../db/queries/postQueries';
+import { createNewPost, getPostById, updatePost } from '../db/queries/postQueries';
 
 export const newPost = [
   ...validatePost,
@@ -72,6 +72,57 @@ export const newPost = [
     res.status(201).json({
       post,
       success: 'Post created successfully!',
+    });
+    return;
+  },
+];
+
+export const editPost = [
+  ...validatePost,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const { userId } = req;
+
+    if (!userId) {
+      res.status(403).json({
+        error: 'Unauthorized Action!',
+      });
+      return;
+    }
+
+    const { postId } = req.params;
+
+    if (!postId) {
+      res.status(400).json({
+        error: 'Failed to edit post as postId is missing!',
+      });
+      return;
+    }
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(409).json({
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    const { content } = req.body;
+
+    const post = await getPostById(postId, userId);
+
+    if (!post) {
+      res.status(404).json({
+        error: 'Failed to edit post as it does not exists!',
+      });
+      return;
+    }
+
+    const editedPost = await updatePost(postId, userId, content);
+
+    res.status(200).json({
+      post: editedPost,
+      success: 'Post edited successfully!',
     });
     return;
   },

@@ -17,3 +17,32 @@ export const createNewPost = async (
 
   return post;
 };
+
+export const getPostById = async (id: string, userId: string) => {
+  const post = await db.post.findUnique({
+    where: {
+      id,
+      userId,
+    },
+  });
+
+  return post;
+};
+
+export const updatePost = async (
+  id: string,
+  userId: string,
+  content: string,
+) => {
+  const post = await db.post.update({
+    where: {
+      id,
+      userId,
+    },
+    data: {
+      content,
+    },
+  });
+
+  return post;
+};
