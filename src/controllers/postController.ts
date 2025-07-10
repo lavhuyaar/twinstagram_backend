@@ -7,6 +7,7 @@ import { validationResult } from 'express-validator';
 import supabase from '../supabase/supabase';
 import {
   createNewPost,
+  getAllPostsByUserId,
   getPostById,
   removePost,
   updatePost,
@@ -183,6 +184,29 @@ export const deletePost = async (
 
   res.status(200).json({
     success: 'Post deleted successfully!',
+  });
+  return;
+};
+
+export const myPosts = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const posts = await getAllPostsByUserId(userId);
+
+  res.status(200).json({
+    posts,
+    success: 'Posts fetched successfully!',
   });
   return;
 };

@@ -2,7 +2,12 @@ import { Router } from 'express';
 import multer from 'multer';
 import { verifyToken } from '../middlewares/verifyToken';
 import { verifyUser } from '../middlewares/verifyUser';
-import { deletePost, editPost, newPost } from '../controllers/postController';
+import {
+  deletePost,
+  editPost,
+  myPosts,
+  newPost,
+} from '../controllers/postController';
 
 const uploads = multer();
 
@@ -12,7 +17,7 @@ const postRoutes = Router();
 postRoutes.use(verifyToken);
 postRoutes.use(verifyUser);
 
-// postRoutes.get('/myposts');
+postRoutes.get('/myposts', myPosts);
 postRoutes.post('/new', uploads.single('image'), newPost);
 postRoutes.put('/:postId', editPost);
 postRoutes.delete('/:postId', deletePost);

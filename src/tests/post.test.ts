@@ -209,10 +209,73 @@ describe('DELETE /v1/posts/:postId', () => {
   it('should delete the post', async () => {
     const response = await request(app)
       .delete(`/v1/posts/${postId}`)
-      .set('Cookie', cookie)
+      .set('Cookie', cookie);
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBe('Post deleted successfully!');
+  });
+
+  afterAll(async () => {
+    await db.post.deleteMany({
+      where: {
+        userId: mockedUserId,
+      },
+    });
+
+    await request(app).post('/v1/auth/logout').set('Cookie', cookie);
+
+    await db.user.deleteMany({
+      where: {
+        username: mockedUser.username,
+      },
+    });
+  });
+});
+
+describe('GET /v1/posts/myposts', () => {
+  const mockedUser = generateMockedUser();
+  let cookie: string;
+  let mockedUserId: string;
+  let postId: string;
+
+  beforeAll(async () => {
+    await request(app).post('/v1/auth/register').send(mockedUser);
+
+    const loginResponse = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: mockedUser.username, password: mockedUser.password });
+
+    mockedUserId = loginResponse.body.user.id;
+
+    cookie = loginResponse.headers['set-cookie'];
+
+    const post = await db.post.create({
+      data: {
+        userId: mockedUserId,
+        content: 'this is mocked post content',
+      },
+    });
+
+    postId = post.id;
+  });
+
+  it('should throw an error when http only cookie is not found', async () => {
+    const response = await request(app).get(`/v1/posts/myposts`);
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
+  it('should return all posts of the user', async () => {
+    const response = await request(app)
+      .get(`/v1/posts/myposts`)
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeDefined();
+    expect(response.body.posts.length).toBe(1);
   });
 
   afterAll(async () => {

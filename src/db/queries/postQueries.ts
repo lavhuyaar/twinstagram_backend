@@ -51,7 +51,17 @@ export const removePost = async (id: string, userId: string) => {
   await db.post.delete({
     where: {
       id,
-      userId
-    }
-  })
-}
+      userId,
+    },
+  });
+};
+
+export const getAllPostsByUserId = async (userId: string) => {
+  const posts = await db.post.findMany({
+    where: {
+      userId,
+    },
+  });
+
+  return posts;
+};
