@@ -5,7 +5,12 @@ import { CustomRequest } from '../types/CustomRequest';
 import { validatePost } from '../validators/postValidator';
 import { validationResult } from 'express-validator';
 import supabase from '../supabase/supabase';
-import { createNewPost, getPostById, updatePost } from '../db/queries/postQueries';
+import {
+  createNewPost,
+  getPostById,
+  removePost,
+  updatePost,
+} from '../db/queries/postQueries';
 
 export const newPost = [
   ...validatePost,
@@ -127,3 +132,57 @@ export const editPost = [
     return;
   },
 ];
+
+export const deletePost = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { postId } = req.params;
+
+  if (!postId) {
+    res.status(400).json({
+      error: 'Failed to edit post as postId is missing!',
+    });
+    return;
+  }
+
+  const post = await getPostById(postId, userId);
+
+  if (!post) {
+    res.status(404).json({
+      error: 'Failed to delete post as it does not exists!',
+    });
+    return;
+  }
+
+  // If post had an image with it
+  if (post.image && post.imageId) {
+    const { data } = await supabase.storage
+      .from('twinstagram')
+      .list(`Post ${post.imageId}`);
+
+    // Removes post from supabase
+    if (data) {
+      await supabase.storage
+        .from('twinstagram')
+        .remove([`Post ${post.imageId}`]);
+    }
+  }
+
+  await removePost(postId, userId);
+
+  res.status(200).json({
+    success: 'Post deleted successfully!',
+  });
+  return;
+};

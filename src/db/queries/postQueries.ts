@@ -46,3 +46,12 @@ export const updatePost = async (
 
   return post;
 };
+
+export const removePost = async (id: string, userId: string) => {
+  await db.post.delete({
+    where: {
+      id,
+      userId
+    }
+  })
+}
