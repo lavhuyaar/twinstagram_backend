@@ -38,7 +38,7 @@ CREATE TABLE "Comment" (
     "userId" TEXT NOT NULL,
     "postId" TEXT NOT NULL,
     "content" VARCHAR(200) NOT NULL,
-    "repliedToUserId" TEXT,
+    "repliedToCommentId" TEXT,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
 

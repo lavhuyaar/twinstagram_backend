@@ -44,7 +44,7 @@ model Comment {
   post            Post     @relation(fields: [postId], references: [id])
   postId          String
   content         String   @db.VarChar(200)
-  repliedToUserId String?
+  repliedToCommentId String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
