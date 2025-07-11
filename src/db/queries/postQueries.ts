@@ -65,3 +65,48 @@ export const getAllPostsByUserId = async (userId: string) => {
 
   return posts;
 };
+
+export const getProtectedPostById = async (id: string, userId: string) => {
+  const post = await db.post.findFirst({
+    where: {
+      AND: [
+        { id },
+        {
+          OR: [
+            {
+              userId,
+            },
+            {
+              user: {
+                profileType: 'PUBLIC',
+              },
+            },
+            {
+              user: {
+                followers: {
+                  some: {
+                    requestByUserId: userId,
+                    isFollowing: 'TRUE',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  return post;
+};
+
+export const getCommentsByPostId = async (postId: string) => {
+  const comments = await db.comment.findMany({
+    where: {
+      postId,
+      repliedToCommentId: null,
+    },
+  });
+
+  return comments;
+};

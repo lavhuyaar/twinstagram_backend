@@ -3,7 +3,7 @@ import app from '../app';
 import { generateMockedUser } from '../utils/generateMockedUser';
 import db from '../db/db';
 
-describe('POST /v1/comments', async () => {
+describe('POST /v1/comments', () => {
   const user = generateMockedUser();
   let cookie: string;
   let postId: string;
@@ -191,7 +191,7 @@ describe('PUT /v1/comments/:commentId', () => {
 
     expect(response.status).toBe(400);
     expect(response.body.errors[0].msg).toBe(
-      'Content must be between 1 and 200 characters!',
+      'Comment must be between 1 and 200 characters.',
     );
   });
 
@@ -291,7 +291,7 @@ describe('DELETE /v1/comments/:commentId', () => {
 
   it('should delete the comment', async () => {
     const response = await request(app)
-      .delete(`/v1/comment/${postId}`)
+      .delete(`/v1/comments/${commentId}`)
       .set('Cookie', cookie);
 
     expect(response.status).toBe(200);
