@@ -109,7 +109,7 @@ describe('POST /v1/auth/login', () => {
       .send({ username: 'WrongUsername', password: mockedUser.password });
 
     expect(response.status).toBe(409);
-    expect(response.body.error).toBe('This username does not exists!');
+    expect(response.body.error).toBe('This username does not exist!');
   });
 
   it('should throw an error with wrong password', async () => {

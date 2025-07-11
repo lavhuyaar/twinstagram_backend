@@ -138,7 +138,7 @@ describe('PUT /v1/posts/:postId', () => {
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe(
-      'Failed to edit post as it does not exists!',
+      'Failed to edit post as it does not exist!',
     );
   });
 
@@ -202,7 +202,7 @@ describe('DELETE /v1/posts/:postId', () => {
 
     expect(response.status).toBe(404);
     expect(response.body.error).toBe(
-      'Failed to delete post as it does not exists!',
+      'Failed to delete post as it does not exist!',
     );
   });
 

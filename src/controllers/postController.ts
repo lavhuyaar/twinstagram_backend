@@ -119,7 +119,7 @@ export const editPost = [
 
     if (!post) {
       res.status(404).json({
-        error: 'Failed to edit post as it does not exists!',
+        error: 'Failed to edit post as it does not exist!',
       });
       return;
     }
@@ -161,7 +161,7 @@ export const deletePost = async (
 
   if (!post) {
     res.status(404).json({
-      error: 'Failed to delete post as it does not exists!',
+      error: 'Failed to delete post as it does not exist!',
     });
     return;
   }

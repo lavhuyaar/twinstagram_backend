@@ -74,9 +74,9 @@ export const loginUser = [
 
     const user = await getUserByUsername(username);
 
-    // If user with this username does not exists
+    // If user with this username does not exist
     if (!user) {
-      res.status(409).json({ error: 'This username does not exists!' });
+      res.status(409).json({ error: 'This username does not exist!' });
       return;
     }
 
