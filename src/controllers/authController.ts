@@ -93,6 +93,8 @@ export const loginUser = [
       throw new Error('JWT_SECRET_KEY not found!');
     }
 
+    delete (user as { password?: string }).password;
+
     //JWT Token
     const token: string = jwt.sign({ user }, JWT_SECRET_KEY, {
       expiresIn: '7 days', //Valid for 7 days
