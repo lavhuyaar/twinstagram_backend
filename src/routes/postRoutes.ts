@@ -8,6 +8,7 @@ import {
   myPosts,
   newPost,
 } from '../controllers/postController';
+import { toggleLikeOnPost } from '../controllers/profileController';
 
 const uploads = multer();
 
@@ -21,5 +22,6 @@ postRoutes.get('/myposts', myPosts);
 postRoutes.post('/new', uploads.single('image'), newPost);
 postRoutes.put('/:postId', editPost);
 postRoutes.delete('/:postId', deletePost);
+postRoutes.post('/like/:postId', toggleLikeOnPost);
 
 export default postRoutes;

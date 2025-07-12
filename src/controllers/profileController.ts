@@ -5,6 +5,7 @@ import { CustomRequest } from '../types/CustomRequest';
 import supabase from '../supabase/supabase';
 import { validateProfile } from '../validators/profileValidator';
 import { isUsernameAvailable, updateUser } from '../db/queries/profileQueries';
+import { getProtectedPostById, toggleLike } from '../db/queries/postQueries';
 
 export const editProfile = [
   ...validateProfile,
@@ -107,3 +108,37 @@ export const editProfile = [
     return;
   },
 ];
+
+export const toggleLikeOnPost = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { postId } = req.params;
+
+  const isPostValid = await getProtectedPostById(postId, userId);
+
+  if (!isPostValid) {
+    res.status(404).json({
+      error: 'Post not found!',
+    });
+    return;
+  }
+
+  const post = await toggleLike(postId, userId);
+
+  res.status(200).json({
+    post,
+    success: 'Like toggled successfully!',
+  });
+  return;
+};

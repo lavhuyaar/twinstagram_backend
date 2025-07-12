@@ -236,7 +236,6 @@ describe('GET /v1/posts/myposts', () => {
   const mockedUser = generateMockedUser();
   let cookie: string;
   let mockedUserId: string;
-  let postId: string;
 
   beforeAll(async () => {
     await request(app).post('/v1/auth/register').send(mockedUser);
@@ -249,14 +248,12 @@ describe('GET /v1/posts/myposts', () => {
 
     cookie = loginResponse.headers['set-cookie'];
 
-    const post = await db.post.create({
+    await db.post.create({
       data: {
         userId: mockedUserId,
         content: 'this is mocked post content',
       },
     });
-
-    postId = post.id;
   });
 
   it('should throw an error when http only cookie is not found', async () => {
@@ -290,6 +287,110 @@ describe('GET /v1/posts/myposts', () => {
     await db.user.deleteMany({
       where: {
         username: mockedUser.username,
+      },
+    });
+  });
+});
+
+describe('POST /v1/posts/like/:postId', () => {
+  const userA = generateMockedUser();
+  const userB = generateMockedUser({ username: 'MockedUserB' });
+  let postId: string;
+  let cookieA: string;
+  let userAId: string;
+  let cookieB: string;
+  let userBId: string;
+
+  beforeAll(async () => {
+    await request(app).post('/v1/auth/register').send(userA);
+
+    await request(app).post('/v1/auth/register').send(userB);
+
+    const loginResponseA = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: userA.username, password: userA.password });
+
+    userAId = loginResponseA.body.user.id;
+    cookieA = loginResponseA.headers['set-cookie'];
+
+    const loginResponseB = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: userB.username, password: userB.password });
+
+    userBId = loginResponseB.body.user.id;
+    cookieB = loginResponseB.headers['set-cookie'];
+
+    const post = await db.post.create({
+      data: {
+        userId: userAId,
+        content: 'this is mocked post content',
+      },
+    });
+
+    postId = post.id;
+  });
+
+  it('should like the post', async () => {
+    const responseA = await request(app)
+      .post(`/v1/posts/like/${postId}`)
+      .set('Cookie', cookieA);
+
+    const responseB = await request(app)
+      .post(`/v1/posts/like/${postId}`)
+      .set('Cookie', cookieB);
+
+    expect(responseA.status).toBe(200);
+    expect(responseA.body.success).toBeDefined();
+    expect(responseA.body.post).toBeDefined();
+
+    expect(responseB.status).toBe(200);
+    expect(responseB.body.success).toBeDefined();
+    expect(responseB.body.post.likes.length).toBe(2);
+  });
+
+  it('should unlike the post', async () => {
+    const response = await request(app)
+      .post(`/v1/posts/like/${postId}`)
+      .set('Cookie', cookieA);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeDefined();
+    expect(response.body.post.likes.length).toBe(1);
+  });
+
+  it('should throw an error when http only cookie is not found', async () => {
+    const response = await request(app).post(`/v1/posts/like/${postId}`);
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
+  it('should throw an error when postId is invalid', async () => {
+    const response = await request(app)
+      .post(`/v1/posts/like/demopost`)
+      .set('Cookie', cookieA);
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBe('Post not found!');
+  });
+
+  afterAll(async () => {
+    await db.post.deleteMany({
+      where: {
+        userId: userAId,
+      },
+    });
+
+    await request(app).post('/v1/auth/logout').set('Cookie', cookieA);
+    await request(app).post('/v1/auth/logout').set('Cookie', cookieB);
+
+    await db.user.deleteMany({
+      where: {
+        username: {
+          in: [userA.username, userB.username],
+        },
       },
     });
   });

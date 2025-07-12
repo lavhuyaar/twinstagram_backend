@@ -110,3 +110,53 @@ export const getCommentsByPostId = async (postId: string) => {
 
   return comments;
 };
+
+export const toggleLike = async (id: string, userId: string) => {
+  const isPostAlreadyLiked = await db.post.findFirst({
+    where: {
+      AND: [
+        { id },
+        {
+          likes: {
+            some: {
+              id: userId,
+            },
+          },
+        },
+      ],
+    },
+  });
+
+  const connectUser = {
+    connect: {
+      id: userId,
+    },
+  };
+
+  const disconnectUser = {
+    disconnect: {
+      id: userId,
+    },
+  };
+
+  const post = await db.post.update({
+    where: {
+      id,
+    },
+    data: {
+      likes: isPostAlreadyLiked ? disconnectUser : connectUser,
+    },
+    include: {
+      likes: {
+        select: {
+          id: true,
+          firstName: true,
+          lastName: true,
+          username: true,
+        },
+      },
+    },
+  });
+
+  return post;
+};
