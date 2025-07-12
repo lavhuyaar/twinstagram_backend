@@ -299,7 +299,6 @@ describe('POST /v1/posts/like/:postId', () => {
   let cookieA: string;
   let userAId: string;
   let cookieB: string;
-  let userBId: string;
 
   beforeAll(async () => {
     await request(app).post('/v1/auth/register').send(userA);
@@ -317,7 +316,6 @@ describe('POST /v1/posts/like/:postId', () => {
       .post('/v1/auth/login')
       .send({ username: userB.username, password: userB.password });
 
-    userBId = loginResponseB.body.user.id;
     cookieB = loginResponseB.headers['set-cookie'];
 
     const post = await db.post.create({
