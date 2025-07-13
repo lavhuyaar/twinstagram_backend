@@ -294,7 +294,7 @@ describe('GET /v1/posts/myposts', () => {
 
 describe('POST /v1/posts/like/:postId', () => {
   const userA = generateMockedUser();
-  const userB = generateMockedUser({ username: 'MockedUserB' });
+  const userB = generateMockedUser({ username: `MockedUserB${Date.now()}` });
   let postId: string;
   let cookieA: string;
   let userAId: string;

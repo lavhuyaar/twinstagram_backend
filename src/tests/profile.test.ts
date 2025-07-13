@@ -128,3 +128,62 @@ describe('PUT /v1/profile', () => {
     });
   });
 });
+
+describe('GET /v1/profile/:targetUserId', () => {
+  const user = generateMockedUser();
+  let cookie: string;
+  let userId: string;
+
+  beforeAll(async () => {
+    // Registers new user (mocked)
+    await request(app).post('/v1/auth/register').send(user);
+
+    // Logs in the mocked user
+    const loginResponse = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: user.username, password: user.password });
+
+    userId = loginResponse.body.user.id;
+
+    // HTTP only cookie
+    cookie = loginResponse.headers['set-cookie'];
+  });
+
+  it('should throw an error if http only cookie is not found', async () => {
+    const response = await request(app).get(`/v1/profile/${userId}`);
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
+  it('should throw an error if targetUserId is invalid', async () => {
+    const response = await request(app)
+      .get('/v1/profile/invaliduserid')
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(404);
+    expect(response.body.error).toBeDefined();
+  });
+
+  it('should return profile details', async () => {
+    const response = await request(app)
+      .get(`/v1/profile/${userId}`)
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeDefined();
+    expect(response.body.profile).toBeDefined();
+  });
+
+  afterAll(async () => {
+    await request(app).get('/v1/auth/logout').set('Cookie', cookie);
+
+    await db.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  });
+});

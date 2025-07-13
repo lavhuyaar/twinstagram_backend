@@ -231,3 +231,15 @@ export const getPendingFollowings = async (userId: string) => {
 
   return pendingFollowings;
 };
+
+export const isUserFollowing = async (targetUserId: string, userId: string) => {
+  const isFollowing = await db.follow.findFirst({
+    where: {
+      requestByUserId: userId,
+      requestToUserId: targetUserId,
+      isFollowing: 'TRUE'
+    }
+  })
+
+  return isFollowing;
+}

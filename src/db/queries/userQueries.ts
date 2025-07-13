@@ -70,6 +70,11 @@ export const getUserById = async (id: string) => {
     where: {
       id,
     },
+    include: {
+      followers: true,
+      following: true,
+      _count: true,
+    },
     omit: {
       password: true,
     },

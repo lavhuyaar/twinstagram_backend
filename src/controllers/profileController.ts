@@ -4,8 +4,15 @@ import { decode } from 'base64-arraybuffer';
 import { CustomRequest } from '../types/CustomRequest';
 import supabase from '../supabase/supabase';
 import { validateProfile } from '../validators/profileValidator';
-import { getProtectedPostById, toggleLike } from '../db/queries/postQueries';
-import { isUsernameAvailable, updateUser } from '../db/queries/userQueries';
+import {
+  getProtectedUserById,
+  getUserById,
+  isUsernameAvailable,
+  updateUser,
+} from '../db/queries/userQueries';
+import { profile } from 'console';
+import { isUserFollowing } from '../db/queries/followQueries';
+import { Follow } from '@prisma/client';
 
 export const editProfile = [
   ...validateProfile,
@@ -109,7 +116,7 @@ export const editProfile = [
   },
 ];
 
-export const toggleLikeOnPost = async (
+export const getProfile = async (
   req: CustomRequest,
   res: Response,
   next: NextFunction,
@@ -123,22 +130,50 @@ export const toggleLikeOnPost = async (
     return;
   }
 
-  const { postId } = req.params;
+  const { targetUserId } = req.params;
 
-  const isPostValid = await getProtectedPostById(postId, userId);
+  const targetUser = await getUserById(targetUserId);
 
-  if (!isPostValid) {
+  if (!targetUser) {
     res.status(404).json({
-      error: 'Post not found!',
+      error: 'Target User not found!',
     });
     return;
   }
 
-  const post = await toggleLike(postId, userId);
+  // Eases the authorization of checking followings and followers for Frontend
+  if (userId === targetUserId) {
+    res.status(200).json({
+      profile: targetUser,
+      success: 'Profile fetched successfully!',
+      type: 'SELF',
+      isFollowing: false,
+    });
+    return;
+  }
 
-  res.status(200).json({
-    post,
-    success: 'Like toggled successfully!',
-  });
-  return;
+  const isFollowing = await isUserFollowing(targetUserId, userId);
+
+  if (!isFollowing) {
+    if (targetUser.profileType === 'PUBLIC') {
+      res.status(200).json({
+        profile: targetUser,
+        success: 'Profile fetched successfully!',
+        type: 'PUBLIC',
+        isFollowing: false,
+      });
+      return;
+    } else {
+      delete (targetUser as { followers?: Follow[] }).followers;
+      delete (targetUser as { followings?: Follow[] }).followings;
+
+      res.status(200).json({
+        profile: targetUser,
+        success: 'Profile fetched successfully!',
+        type: 'PRIVATE',
+        isFollowing: false,
+      });
+      return;
+    }
+  }
 };

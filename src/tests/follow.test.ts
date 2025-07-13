@@ -549,7 +549,7 @@ describe('GET /v1/follow/followers/:requestId', () => {
 
 describe('GET /v1/follow/notFollowing', () => {
   const userA = generateMockedUser();
-  const userB = generateMockedUser({ username: `MockedUserB${Date.now()}` });
+  const userB = generateMockedUser({ username: `Mdadadada${Date.now()}` });
   let cookieA: string;
 
   beforeAll(async () => {

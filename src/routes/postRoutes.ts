@@ -9,8 +9,8 @@ import {
   myPosts,
   newPost,
   postsOnFeed,
+  toggleLikeOnPost,
 } from '../controllers/postController';
-import { toggleLikeOnPost } from '../controllers/profileController';
 
 const uploads = multer();
 
