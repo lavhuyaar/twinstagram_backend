@@ -19,7 +19,7 @@ export const createNewRequest = async (
   targetUserId: string,
   targetUserProfileType: 'PRIVATE' | 'PUBLIC',
 ) => {
-  const request = await db.follow.create({
+  const followRequest = await db.follow.create({
     data: {
       requestByUserId: userId,
       requestToUserId: targetUserId,
@@ -27,7 +27,7 @@ export const createNewRequest = async (
     },
   });
 
-  return request;
+  return followRequest;
 };
 
 export const getRequestToBeAccepted = async (id: string, userId: string) => {
@@ -74,4 +74,160 @@ export const deleteRequestById = async (id: string) => {
       id,
     },
   });
+};
+
+export const getFollowingsByUserId = async (
+  targetUserId: string,
+  userId: string,
+) => {
+  const followings = await db.follow.findMany({
+    where: {
+      AND: [
+        { requestByUserId: targetUserId },
+        { isFollowing: 'TRUE' },
+        {
+          OR: [
+            {
+              requestBy: {
+                followers: {
+                  some: {
+                    id: userId,
+                  },
+                },
+              },
+            },
+            {
+              requestBy: {
+                profileType: 'PUBLIC',
+              },
+            },
+            {
+              requestBy: {
+                id: userId,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    include: {
+      requestTo: {
+        omit: {
+          password: true,
+        },
+      },
+    },
+  });
+
+  return followings;
+};
+
+export const getFollowersByUserId = async (
+  targetUserId: string,
+  userId: string,
+) => {
+  const followers = await db.follow.findMany({
+    where: {
+      AND: [
+        { requestToUserId: targetUserId },
+        { isFollowing: 'TRUE' },
+        {
+          OR: [
+            {
+              requestTo: {
+                followers: {
+                  some: {
+                    id: userId,
+                  },
+                },
+              },
+            },
+            {
+              requestTo: {
+                profileType: 'PUBLIC',
+              },
+            },
+            {
+              requestTo: {
+                id: userId,
+              },
+            },
+          ],
+        },
+      ],
+    },
+    include: {
+      requestBy: {
+        omit: {
+          password: true,
+        },
+      },
+    },
+  });
+
+  return followers;
+};
+
+export const getNotFollowingByUserId = async (userId: string) => {
+  const notFollowing = await db.user.findMany({
+    where: {
+      AND: [
+        {
+          NOT: {
+            followers: {
+              some: {
+                id: userId,
+              },
+            },
+          },
+        },
+        {
+          NOT: {
+            id: userId,
+          },
+        },
+      ],
+    },
+    omit: {
+      password: true,
+    },
+  });
+
+  return notFollowing;
+};
+
+export const getPendingFollowRequests = async (userId: string) => {
+  const pendingFollowRequests = await db.follow.findMany({
+    where: {
+      requestToUserId: userId,
+      isFollowing: 'PENDING',
+    },
+    include: {
+      requestBy: {
+        omit: {
+          password: true,
+        },
+      },
+    },
+  });
+
+  return pendingFollowRequests;
+};
+
+export const getPendingFollowings = async (userId: string) => {
+  const pendingFollowings = await db.follow.findMany({
+    where: {
+      requestByUserId: userId,
+      isFollowing: 'PENDING',
+    },
+    include: {
+      requestTo: {
+        omit: {
+          password: true,
+        },
+      },
+    },
+  });
+
+  return pendingFollowings;
 };

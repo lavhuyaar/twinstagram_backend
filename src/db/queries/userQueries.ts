@@ -65,8 +65,6 @@ export const updateUser = async (
   return user;
 };
 
-
-
 export const getUserById = async (id: string) => {
   const user = await db.user.findFirst({
     where: {
@@ -74,6 +72,38 @@ export const getUserById = async (id: string) => {
     },
     omit: {
       password: true,
+    },
+  });
+
+  return user;
+};
+
+export const getProtectedUserById = async (
+  targetUserId: string,
+  userId: string,
+) => {
+  const user = await db.user.findFirst({
+    where: {
+      AND: [
+        { id: targetUserId },
+        {
+          OR: [
+            {
+              followers: {
+                some: {
+                  id: userId,
+                },
+              },
+            },
+            {
+              id: userId,
+            },
+            {
+              profileType: 'PUBLIC',
+            },
+          ],
+        },
+      ],
     },
   });
 

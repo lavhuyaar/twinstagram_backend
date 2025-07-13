@@ -4,11 +4,16 @@ import {
   acceptPendingRequest,
   createNewRequest,
   deleteRequestById,
+  getFollowersByUserId,
+  getFollowingsByUserId,
+  getNotFollowingByUserId,
+  getPendingFollowings,
+  getPendingFollowRequests,
   getRequestById,
   getRequestByTargetUserId,
   getRequestToBeAccepted,
 } from '../db/queries/followQueries';
-import { getUserById } from '../db/queries/userQueries';
+import { getProtectedUserById, getUserById } from '../db/queries/userQueries';
 
 // Creates new follow request
 export const newFollowRequest = async (
@@ -162,6 +167,159 @@ export const deleteRequest = async (
 
   res.status(200).json({
     success: successMessage,
+  });
+  return;
+};
+
+export const getFollowings = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { targetUserId } = req.params;
+
+  // Checks if targetUserId is valid
+  const existingTargetUser = await getProtectedUserById(targetUserId, userId);
+
+  if (!existingTargetUser) {
+    res.status(404).json({
+      error: 'Failed to fetch followings!',
+    });
+    return;
+  }
+
+  const followings = await getFollowingsByUserId(targetUserId, userId);
+
+  res.status(200).json({
+    followings,
+    success: 'Followings fetched successfully!',
+  });
+  return;
+};
+
+export const getFollowers = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+  const { targetUserId } = req.params;
+
+  // Checks if targetUserId is valid
+  const existingTargetUser = await getProtectedUserById(targetUserId, userId);
+
+  if (!existingTargetUser) {
+    res.status(404).json({
+      error: 'Failed to fetch followers!',
+    });
+    return;
+  }
+
+  const followers = await getFollowersByUserId(targetUserId, userId);
+
+  res.status(200).json({
+    followers,
+    success: 'Followers fetched successfully!',
+  });
+  return;
+};
+
+// List of people not following the User
+export const notFollowing = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const usersNotFollowing = await getNotFollowingByUserId(userId);
+
+  res.status(200).json({
+    usersNotFollowing,
+    success: 'Users not following fetched successfully!',
+  });
+  return;
+};
+
+export const pendingFollowRequests = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const allPendingFollowRequests = await getPendingFollowRequests(userId);
+
+  if (!allPendingFollowRequests) {
+    res.status(500).json({
+      error: 'Failed to fetch received pending follow requests!',
+    });
+    return;
+  }
+
+  res.status(200).json({
+    pendingFollowRequests: allPendingFollowRequests,
+    success: 'Received follow requests (pending) fetched successfully!',
+  });
+  return;
+};
+
+export const pendingFollowingRequests = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const allPendingFollowings = await getPendingFollowings(userId);
+
+  if (!allPendingFollowings) {
+    res.status(500).json({
+      error: 'Failed to fetch sent follow requests!',
+    });
+    return;
+  }
+
+  res.status(200).json({
+    pendingFollowings: allPendingFollowings,
+    success: 'Sent follow requests (pending) fetched successfully!',
   });
   return;
 };
