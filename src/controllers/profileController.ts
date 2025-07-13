@@ -4,8 +4,8 @@ import { decode } from 'base64-arraybuffer';
 import { CustomRequest } from '../types/CustomRequest';
 import supabase from '../supabase/supabase';
 import { validateProfile } from '../validators/profileValidator';
-import { isUsernameAvailable, updateUser } from '../db/queries/profileQueries';
 import { getProtectedPostById, toggleLike } from '../db/queries/postQueries';
+import { isUsernameAvailable, updateUser } from '../db/queries/userQueries';
 
 export const editProfile = [
   ...validateProfile,

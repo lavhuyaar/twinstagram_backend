@@ -6,7 +6,7 @@ import {
   validateRegisterUser,
 } from '../validators/authValidator';
 import { validationResult } from 'express-validator';
-import { createNewUser, getUserByUsername } from '../db/queries/authQueries';
+import { createNewUser, getUserByUsername } from '../db/queries/userQueries';
 
 const JWT_SECRET_KEY: string | undefined = process.env.JWT_SECRET_KEY;
 
