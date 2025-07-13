@@ -9,6 +9,8 @@ import {
   createNewPost,
   getAllPostsByUserId,
   getPostById,
+  getPostsOnFeed,
+  getProtectedPostById,
   removePost,
   updatePost,
 } from '../db/queries/postQueries';
@@ -209,4 +211,68 @@ export const myPosts = async (
     success: 'Posts fetched successfully!',
   });
   return;
+};
+
+export const postsOnFeed = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { page, limit } = req.query;
+
+  const safePage: number = !isNaN(Number(page)) ? Number(page) : 1;
+  const safeLimit: number = !isNaN(Number(limit)) ? Number(limit) : 20;
+
+  const { totalCount, posts } = await getPostsOnFeed(
+    userId,
+    safePage,
+    safeLimit,
+  );
+
+  res.status(200).json({
+    posts,
+    totalCount,
+    success: 'Feed posts fetched successfully!',
+  });
+  return;
+};
+
+export const getPost = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { postId } = req.params;
+
+  const validPost = await getProtectedPostById(postId, userId);
+
+  if (!validPost) {
+    res.status(404).json({
+      error: 'Post not found!',
+    });
+    return;
+  }
+
+  res.status(200).json({
+    post: validPost,
+    success: 'Post fetched successfully!',
+  });
 };

@@ -160,3 +160,86 @@ export const toggleLike = async (id: string, userId: string) => {
 
   return post;
 };
+
+export const getPostsOnFeed = async (
+  userId: string,
+  page: number,
+  limit: number,
+) => {
+  const startIndex: number = (page - 1) * limit;
+
+  const posts = await db.post.findMany({
+    skip: startIndex,
+    take: limit,
+    orderBy: { createdAt: 'desc' },
+    where: {
+      AND: [
+        {
+          NOT: {
+            userId,
+          },
+        },
+        {
+          OR: [
+            {
+              user: {
+                followers: {
+                  some: {
+                    requestByUserId: userId,
+                    isFollowing: 'TRUE',
+                  },
+                },
+              },
+            },
+            {
+              user: {
+                profileType: 'PUBLIC',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: true,
+    },
+  });
+
+  const totalCount = await db.post.count({
+    where: {
+      AND: [
+        {
+          NOT: {
+            userId,
+          },
+        },
+        {
+          OR: [
+            {
+              user: {
+                followers: {
+                  some: {
+                    requestByUserId: userId,
+                    isFollowing: 'TRUE',
+                  },
+                },
+              },
+            },
+            {
+              user: {
+                profileType: 'PUBLIC',
+              },
+            },
+          ],
+        },
+      ],
+    },
+  });
+
+  return { posts, totalCount };
+};
