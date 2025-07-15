@@ -187,3 +187,72 @@ describe('GET /v1/profile/:targetUserId', () => {
     });
   });
 });
+
+describe('PUT /v1/profile/type/toggle', () => {
+  const user = generateMockedUser();
+  let cookie: string;
+  let userId: string;
+
+  beforeAll(async () => {
+    // Registers new user (mocked)
+    await request(app).post('/v1/auth/register').send(user);
+
+    // Logs in the mocked user
+    const loginResponse = await request(app)
+      .post('/v1/auth/login')
+      .send({ username: user.username, password: user.password });
+
+    userId = loginResponse.body.user.id;
+
+    // HTTP only cookie
+    cookie = loginResponse.headers['set-cookie'];
+  });
+
+  it('should throw an error if http only cookie is not found', async () => {
+    const response = await request(app).put('/v1/profile/profileType/toggle');
+
+    expect(response.status).toBe(401);
+    expect(response.body.error).toBe(
+      'Unauthorized Action: Auth token is missing!',
+    );
+  });
+
+  it('should throw an error if profileType param is not found', async () => {
+    const response = await request(app)
+      .put('/v1/profile/type/toggle')
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+
+  it('should change the profile type of user to private', async () => {
+    const response = await request(app)
+      .put('/v1/profile/type/toggle?profileType=PRIVATE')
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeDefined();
+    expect(response.body.user.profileType).toBe('PRIVATE');
+  });
+
+  it('should change the profile type of user to public', async () => {
+    const response = await request(app)
+      .put('/v1/profile/type/toggle?profileType=PUBLIC')
+      .set('Cookie', cookie);
+
+    expect(response.status).toBe(200);
+    expect(response.body.success).toBeDefined();
+    expect(response.body.user.profileType).toBe('PUBLIC');
+  });
+
+  afterAll(async () => {
+    await request(app).get('/v1/auth/logout').set('Cookie', cookie);
+
+    await db.user.delete({
+      where: {
+        id: userId,
+      },
+    });
+  });
+});

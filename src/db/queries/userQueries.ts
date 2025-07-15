@@ -5,6 +5,15 @@ export const getUserByUsername = async (username: string) => {
     where: {
       username,
     },
+    include: {
+      _count: {
+        select: {
+          followers: true,
+          following: true,
+          posts: true,
+        },
+      },
+    },
   });
 
   return user;
@@ -109,6 +118,22 @@ export const getProtectedUserById = async (
           ],
         },
       ],
+    },
+  });
+
+  return user;
+};
+
+export const updateProfileType = async (
+  userId: string,
+  profileType: 'PUBLIC' | 'PRIVATE',
+) => {
+  const user = await db.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      profileType,
     },
   });
 

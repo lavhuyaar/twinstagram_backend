@@ -125,6 +125,19 @@ export const toggleLike = async (id: string, userId: string) => {
         },
       ],
     },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: true,
+      likes: {
+        omit: {
+          password: true,
+        },
+      },
+    },
   });
 
   const connectUser = {
@@ -147,12 +160,15 @@ export const toggleLike = async (id: string, userId: string) => {
       likes: isPostAlreadyLiked ? disconnectUser : connectUser,
     },
     include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: true,
       likes: {
-        select: {
-          id: true,
-          firstName: true,
-          lastName: true,
-          username: true,
+        where: {
+          id: userId
         },
       },
     },
@@ -207,6 +223,11 @@ export const getPostsOnFeed = async (
         },
       },
       _count: true,
+      likes: {
+        where: {
+          id: userId
+        }
+      },
     },
   });
 

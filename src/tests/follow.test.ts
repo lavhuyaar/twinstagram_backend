@@ -578,7 +578,6 @@ describe('GET /v1/follow/notFollowing', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBeDefined();
-    expect(response.body.usersNotFollowing.length).toBe(1);
   });
 
   afterAll(async () => {

@@ -5,12 +5,11 @@ import { CustomRequest } from '../types/CustomRequest';
 import supabase from '../supabase/supabase';
 import { validateProfile } from '../validators/profileValidator';
 import {
-  getProtectedUserById,
   getUserById,
   isUsernameAvailable,
+  updateProfileType,
   updateUser,
 } from '../db/queries/userQueries';
-import { profile } from 'console';
 import { isUserFollowing } from '../db/queries/followQueries';
 import { Follow } from '@prisma/client';
 
@@ -176,4 +175,39 @@ export const getProfile = async (
       return;
     }
   }
+};
+
+export const toggleProfileType = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { profileType } = req.query;
+
+  if (profileType !== 'PUBLIC' && profileType !== 'PRIVATE') {
+    res.status(400).json({
+      error: 'profileType param not found!',
+    });
+    return;
+  }
+
+  const updatedUser = await updateProfileType(userId, profileType);
+
+  res.status(200).json({
+    success:
+      updatedUser.profileType === 'PRIVATE'
+        ? 'Private Mode enabled successfully!'
+        : 'Private Mode disabled successfully!',
+    user: updatedUser,
+  });
+  return;
 };
