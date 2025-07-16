@@ -4,14 +4,31 @@ export const createNewComment = async (
   content: string,
   userId: string,
   postId: string,
-  repliedToCommentId?: string,
 ) => {
   const comment = await db.comment.create({
     data: {
       content,
       userId,
       postId,
-      repliedToCommentId,
+    },
+    include: {
+      _count: true,
+    },
+  });
+
+  return comment;
+};
+
+export const createNewSubComment = async (
+  content: string,
+  userId: string,
+  parentCommentId: string,
+) => {
+  const comment = await db.subComment.create({
+    data: {
+      content,
+      userId,
+      parentCommentId,
     },
   });
 
@@ -68,9 +85,9 @@ export const getCommentById = async (id: string, userId: string) => {
 
 export const removeComment = async (id: string) => {
   // Deletes all the replied comments along with the main comment
-  await db.comment.deleteMany({
+  await db.subComment.deleteMany({
     where: {
-      repliedToCommentId: id,
+      parentCommentId: id,
     },
   });
 
@@ -86,7 +103,6 @@ export const getMainComment = async (id: string, userId: string) => {
     where: {
       AND: [
         { id },
-        { repliedToCommentId: null },
         {
           OR: [
             {
@@ -117,9 +133,33 @@ export const getMainComment = async (id: string, userId: string) => {
 };
 
 export const getSubCommentsByCommentId = async (commentId: string) => {
+  const comments = await db.subComment.findMany({
+    where: {
+      parentCommentId: commentId,
+    },
+    orderBy: {
+      createdAt: 'asc',
+    },
+  });
+
+  return comments;
+};
+
+export const getCommentsByPostId = async (postId: string) => {
   const comments = await db.comment.findMany({
     where: {
-      repliedToCommentId: commentId,
+      postId,
+    },
+    orderBy: {
+      createdAt: 'desc',
+    },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: true,
     },
   });
 

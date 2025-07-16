@@ -95,20 +95,22 @@ export const getProtectedPostById = async (id: string, userId: string) => {
         },
       ],
     },
-  });
-
-  return post;
-};
-
-export const getCommentsByPostId = async (postId: string) => {
-  const comments = await db.comment.findMany({
-    where: {
-      postId,
-      repliedToCommentId: null,
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      likes: {
+        where: {
+          id: userId,
+        },
+      },
+      _count: true,
     },
   });
 
-  return comments;
+  return post;
 };
 
 export const toggleLike = async (id: string, userId: string) => {
@@ -124,19 +126,6 @@ export const toggleLike = async (id: string, userId: string) => {
           },
         },
       ],
-    },
-    include: {
-      user: {
-        omit: {
-          password: true,
-        },
-      },
-      _count: true,
-      likes: {
-        omit: {
-          password: true,
-        },
-      },
     },
   });
 
@@ -168,7 +157,7 @@ export const toggleLike = async (id: string, userId: string) => {
       _count: true,
       likes: {
         where: {
-          id: userId
+          id: userId,
         },
       },
     },
@@ -225,8 +214,8 @@ export const getPostsOnFeed = async (
       _count: true,
       likes: {
         where: {
-          id: userId
-        }
+          id: userId,
+        },
       },
     },
   });

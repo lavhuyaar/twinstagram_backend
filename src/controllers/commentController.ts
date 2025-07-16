@@ -4,17 +4,16 @@ import { validateComment } from '../validators/commentValidator';
 import { validationResult } from 'express-validator';
 import {
   createNewComment,
+  createNewSubComment,
   getCommentById,
+  getCommentsByPostId,
   getMainComment,
   getMyCommentById,
   getSubCommentsByCommentId,
   removeComment,
   updateComment,
 } from '../db/queries/commentQueries';
-import {
-  getCommentsByPostId,
-  getProtectedPostById,
-} from '../db/queries/postQueries';
+import { getProtectedPostById } from '../db/queries/postQueries';
 
 export const newComment = [
   ...validateComment,
@@ -46,12 +45,9 @@ export const newComment = [
       return;
     }
 
-    const comment = await createNewComment(
-      content,
-      userId,
-      postId,
-      repliedToCommentId,
-    );
+    const comment = repliedToCommentId
+      ? await createNewSubComment(content, userId, repliedToCommentId)
+      : await createNewComment(content, userId, postId);
 
     if (!comment) {
       res.status(401).json({

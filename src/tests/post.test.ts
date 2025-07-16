@@ -294,7 +294,7 @@ describe('GET /v1/posts/myposts', () => {
 
 describe('POST /v1/posts/like/:postId', () => {
   const userA = generateMockedUser();
-  const userB = generateMockedUser({ username: `MockedUserB${Date.now()}` });
+  const userB = generateMockedUser({ username: `ModdadarB${Date.now()}` });
   let postId: string;
   let cookieA: string;
   let userAId: string;
@@ -343,7 +343,7 @@ describe('POST /v1/posts/like/:postId', () => {
 
     expect(responseB.status).toBe(200);
     expect(responseB.body.success).toBeDefined();
-    expect(responseB.body.post.likes.length).toBe(2);
+    expect(responseB.body.post._count.likes).toBe(2);
   });
 
   it('should unlike the post', async () => {
@@ -353,7 +353,7 @@ describe('POST /v1/posts/like/:postId', () => {
 
     expect(response.status).toBe(200);
     expect(response.body.success).toBeDefined();
-    expect(response.body.post.likes.length).toBe(1);
+    expect(response.body.post._count.likes).toBe(1);
   });
 
   it('should throw an error when http only cookie is not found', async () => {

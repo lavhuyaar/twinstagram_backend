@@ -22,6 +22,7 @@ model User {
   followers      Follow[]     @relation("Follower")
   createdAt      DateTime     @default(now())
   updatedAt      DateTime     @updatedAt
+  subComments    SubComment[]
 }
 
 model Post {
@@ -38,13 +39,24 @@ model Post {
 }
 
 model Comment {
+  id        String       @id @default(uuid())
+  user      User         @relation(fields: [userId], references: [id])
+  userId    String
+  post      Post         @relation(fields: [postId], references: [id])
+  postId    String
+  content   String       @db.VarChar(200)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  replies   SubComment[]
+}
+
+model SubComment {
   id              String   @id @default(uuid())
+  content         String   @db.VarChar(200)
   user            User     @relation(fields: [userId], references: [id])
   userId          String
-  post            Post     @relation(fields: [postId], references: [id])
-  postId          String
-  content         String   @db.VarChar(200)
-  repliedToCommentId String?
+  parentCommentId String
+  parentComment   Comment  @relation(fields: [parentCommentId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }

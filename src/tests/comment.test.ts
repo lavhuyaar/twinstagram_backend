@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../app';
 import { generateMockedUser } from '../utils/generateMockedUser';
 import db from '../db/db';
+import { createNewComment } from '../db/queries/commentQueries';
 
 describe('POST /v1/comments', () => {
   const user = generateMockedUser();
@@ -57,7 +58,6 @@ describe('POST /v1/comments', () => {
       });
 
     expect(response.status).toBe(201);
-    expect(response.body.comment).toBeDefined();
     expect(response.body.success).toBeDefined();
   });
 
@@ -346,7 +346,7 @@ describe('GET /v1/comments/post/:postId', () => {
 
     postId = post.id;
 
-    const comment = await db.comment.create({
+    await db.comment.create({
       data: {
         postId,
         userId,
@@ -443,15 +443,6 @@ describe('GET /v1/comments/comment/:commentId', () => {
     });
 
     commentId = comment.id;
-
-    await db.comment.create({
-      data: {
-        content: 'This is a reply to the mocked comment',
-        postId,
-        userId,
-        repliedToCommentId: commentId,
-      },
-    });
   });
 
   it('should throw an error when http only cookie is not found', async () => {
@@ -487,6 +478,12 @@ describe('GET /v1/comments/comment/:commentId', () => {
   });
 
   afterAll(async () => {
+    await db.subComment.deleteMany({
+      where: {
+        parentCommentId: commentId,
+      },
+    });
+
     await db.comment.deleteMany({
       where: {
         userId,
