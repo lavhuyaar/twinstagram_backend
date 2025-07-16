@@ -46,8 +46,35 @@ export const getMyCommentById = async (commentId: string, userId: string) => {
   return comment;
 };
 
+export const getMySubCommentById = async (
+  commentId: string,
+  userId: string,
+) => {
+  const comment = await db.subComment.findFirst({
+    where: {
+      id: commentId,
+      userId,
+    },
+  });
+
+  return comment;
+};
+
 export const updateComment = async (id: string, content: string) => {
   const comment = await db.comment.update({
+    where: {
+      id,
+    },
+    data: {
+      content,
+    },
+  });
+
+  return comment;
+};
+
+export const updateSubComment = async (id: string, content: string) => {
+  const comment = await db.subComment.update({
     where: {
       id,
     },
@@ -98,6 +125,14 @@ export const removeComment = async (id: string) => {
   });
 };
 
+export const removeSubComment = async (id: string) => {
+  await db.subComment.delete({
+    where: {
+      id,
+    },
+  });
+};
+
 export const getMainComment = async (id: string, userId: string) => {
   const comment = db.comment.findFirst({
     where: {
@@ -136,6 +171,13 @@ export const getSubCommentsByCommentId = async (commentId: string) => {
   const comments = await db.subComment.findMany({
     where: {
       parentCommentId: commentId,
+    },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
     },
     orderBy: {
       createdAt: 'asc',

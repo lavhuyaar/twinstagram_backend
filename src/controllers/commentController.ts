@@ -9,9 +9,12 @@ import {
   getCommentsByPostId,
   getMainComment,
   getMyCommentById,
+  getMySubCommentById,
   getSubCommentsByCommentId,
   removeComment,
+  removeSubComment,
   updateComment,
+  updateSubComment,
 } from '../db/queries/commentQueries';
 import { getProtectedPostById } from '../db/queries/postQueries';
 
@@ -149,6 +152,40 @@ export const deleteComment = async (
   return;
 };
 
+export const deleteSubComment = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { commentId } = req.params;
+
+  const validComment = await getMySubCommentById(commentId, userId);
+
+  if (!validComment) {
+    res.status(404).json({
+      error: 'Failed to delete comment as it does not exist!',
+    });
+
+    return;
+  }
+
+  await removeSubComment(commentId);
+
+  res.status(200).json({
+    success: 'Comment deleted successfully!',
+  });
+  return;
+};
+
 export const getComments = async (
   req: CustomRequest,
   res: Response,
@@ -216,3 +253,54 @@ export const getSubComments = async (
   });
   return;
 };
+
+export const editSubComment = [
+  ...validateComment,
+  async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const { userId } = req;
+
+    if (!userId) {
+      res.status(403).json({
+        error: 'Unauthorized Action!',
+      });
+      return;
+    }
+
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      res.status(400).json({
+        errors: errors.array(),
+      });
+      return;
+    }
+
+    const { commentId } = req.params;
+    const { content } = req.body;
+
+    const comment = await getMySubCommentById(commentId, userId);
+
+    if (!comment) {
+      res.status(404).json({
+        error: 'Failed to edit comment as it does not exist!',
+      });
+
+      return;
+    }
+
+    const editedComment = await updateSubComment(commentId, content);
+
+    if (!editedComment) {
+      res.status(401).json({
+        error: 'Failed to edit comment!',
+      });
+      return;
+    }
+
+    res.status(200).json({
+      comment: editedComment,
+      success: 'Comment edited successfully!',
+    });
+    return;
+  },
+];
