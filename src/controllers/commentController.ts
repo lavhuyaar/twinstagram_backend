@@ -49,7 +49,7 @@ export const newComment = [
     }
 
     const comment = repliedToCommentId
-      ? await createNewSubComment(content, userId, repliedToCommentId)
+      ? await createNewSubComment(content, userId, repliedToCommentId, postId)
       : await createNewComment(content, userId, postId);
 
     if (!comment) {

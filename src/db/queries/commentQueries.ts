@@ -23,12 +23,14 @@ export const createNewSubComment = async (
   content: string,
   userId: string,
   parentCommentId: string,
+  postId: string,
 ) => {
   const comment = await db.subComment.create({
     data: {
       content,
       userId,
       parentCommentId,
+      postId,
     },
   });
 

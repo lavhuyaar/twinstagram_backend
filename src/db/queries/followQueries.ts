@@ -112,8 +112,18 @@ export const getFollowingsByUserId = async (
     },
     include: {
       requestTo: {
-        omit: {
-          password: true,
+        select: {
+          followers: {
+            where: {
+              requestByUserId: userId,
+            },
+          },
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilePicture: true,
+          profileType: true,
+          username: true,
         },
       },
     },
@@ -158,8 +168,18 @@ export const getFollowersByUserId = async (
     },
     include: {
       requestBy: {
-        omit: {
-          password: true,
+        select: {
+          followers: {
+            where: {
+              requestByUserId: userId,
+            },
+          },
+          id: true,
+          firstName: true,
+          lastName: true,
+          profilePicture: true,
+          profileType: true,
+          username: true,
         },
       },
     },
@@ -237,8 +257,8 @@ export const isRequestSent = async (targetUserId: string, userId: string) => {
     where: {
       requestByUserId: userId,
       requestToUserId: targetUserId,
-    }
-  })
+    },
+  });
 
   return isRequestCreated;
-}
+};

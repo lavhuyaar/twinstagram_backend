@@ -26,16 +26,17 @@ model User {
 }
 
 model Post {
-  id        String    @id @default(uuid())
-  user      User      @relation("My Posts", fields: [userId], references: [id])
-  userId    String
-  content   String    @db.VarChar(2000)
-  image     String?
-  imageId   String?
-  comments  Comment[]
-  likes     User[]    @relation("Liked Posts")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  id          String       @id @default(uuid())
+  user        User         @relation("My Posts", fields: [userId], references: [id])
+  userId      String
+  content     String       @db.VarChar(2000)
+  image       String?
+  imageId     String?
+  comments    Comment[]
+  subComments SubComment[]
+  likes       User[]       @relation("Liked Posts")
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 }
 
 model Comment {
@@ -56,6 +57,8 @@ model SubComment {
   user            User     @relation(fields: [userId], references: [id])
   userId          String
   parentCommentId String
+  postId          String
+  post            Post     @relation(fields: [postId], references: [id])
   parentComment   Comment  @relation(fields: [parentCommentId], references: [id])
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
