@@ -159,5 +159,17 @@ export const updateProfileType = async (
     },
   });
 
+  // Ensures all the follow requests sent to user (private before) are automatically approved
+  if (profileType === 'PUBLIC') {
+    await db.follow.updateMany({
+      where: {
+        requestToUserId: userId,
+      },
+      data: {
+        isFollowing: 'TRUE',
+      },
+    });
+  }
+
   return user;
 };
