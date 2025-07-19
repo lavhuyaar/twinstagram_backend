@@ -80,9 +80,31 @@ export const getUserById = async (id: string) => {
       id,
     },
     include: {
-      followers: true,
-      following: true,
-      _count: true,
+      followers: {
+        where: {
+          isFollowing: 'TRUE',
+        },
+      },
+      following: {
+        where: {
+          isFollowing: 'TRUE',
+        },
+      },
+      _count: {
+        select: {
+          posts: true,
+          followers: {
+            where: {
+              isFollowing: 'TRUE',
+            },
+          },
+          following: {
+            where: {
+              isFollowing: 'TRUE',
+            },
+          },
+        },
+      },
     },
     omit: {
       password: true,

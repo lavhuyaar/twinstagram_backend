@@ -6,6 +6,7 @@ import {
   deletePost,
   editPost,
   getPost,
+  getUserPosts,
   myPosts,
   newPost,
   postsOnFeed,
@@ -26,5 +27,6 @@ postRoutes.delete('/:postId', deletePost);
 postRoutes.post('/like/:postId', toggleLikeOnPost);
 postRoutes.get('/feed', postsOnFeed);
 postRoutes.get('/post/:postId', getPost);
+postRoutes.get('/user/:targetUserId', getUserPosts);
 
 export default postRoutes;

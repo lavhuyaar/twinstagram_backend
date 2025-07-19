@@ -253,3 +253,54 @@ export const getPostsOnFeed = async (
 
   return { posts, totalCount };
 };
+
+export const getProtectedPostsByUserId = async (
+  targetUserId: string,
+  userId: string,
+) => {
+  const posts = await db.post.findMany({
+    orderBy: { createdAt: 'desc' },
+    where: {
+      AND: [
+        { userId: targetUserId },
+        {
+          OR: [
+            {
+              userId,
+            },
+            {
+              user: {
+                profileType: 'PUBLIC',
+              },
+            },
+            {
+              user: {
+                followers: {
+                  some: {
+                    requestByUserId: userId,
+                    isFollowing: 'TRUE',
+                  },
+                },
+              },
+            },
+          ],
+        },
+      ],
+    },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      _count: true,
+      likes: {
+        where: {
+          id: userId,
+        },
+      },
+    },
+  });
+
+  return posts;
+};

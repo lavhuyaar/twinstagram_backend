@@ -14,6 +14,7 @@ import {
   removePost,
   toggleLike,
   updatePost,
+  getProtectedPostsByUserId,
 } from '../db/queries/postQueries';
 
 export const newPost = [
@@ -308,6 +309,38 @@ export const toggleLikeOnPost = async (
   res.status(200).json({
     post,
     success: 'Like toggled successfully!',
+  });
+  return;
+};
+
+export const getUserPosts = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const { targetUserId } = req.params;
+
+  const posts = await getProtectedPostsByUserId(targetUserId, userId);
+
+  if (!posts) {
+    res.status(400).json({
+      error: 'Failed to fetch posts!',
+    });
+    return;
+  }
+
+  res.status(200).json({
+    posts,
+    success: 'Posts fetched successfully!',
   });
   return;
 };

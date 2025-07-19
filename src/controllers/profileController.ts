@@ -10,7 +10,7 @@ import {
   updateProfileType,
   updateUser,
 } from '../db/queries/userQueries';
-import { isUserFollowing } from '../db/queries/followQueries';
+import { isRequestSent } from '../db/queries/followQueries';
 import { Follow } from '@prisma/client';
 
 export const editProfile = [
@@ -151,30 +151,28 @@ export const getProfile = async (
     return;
   }
 
-  const isFollowing = await isUserFollowing(targetUserId, userId);
+  const isFollowRequestSent = await isRequestSent(targetUserId, userId);
 
-  if (!isFollowing) {
-    if (targetUser.profileType === 'PUBLIC') {
-      res.status(200).json({
-        profile: targetUser,
-        success: 'Profile fetched successfully!',
-        type: 'PUBLIC',
-        isFollowing: false,
-      });
-      return;
-    } else {
-      delete (targetUser as { followers?: Follow[] }).followers;
-      delete (targetUser as { followings?: Follow[] }).followings;
-
-      res.status(200).json({
-        profile: targetUser,
-        success: 'Profile fetched successfully!',
-        type: 'PRIVATE',
-        isFollowing: false,
-      });
-      return;
-    }
+  if (isFollowRequestSent || targetUser?.profileType === 'PUBLIC') {
+    res.status(200).json({
+      profile: targetUser,
+      success: 'Profile fetched successfully!',
+      type: targetUser?.profileType,
+      isFollowing: isFollowRequestSent?.isFollowing ?? 'FALSE',
+      followRequestId: isFollowRequestSent?.id ?? null,
+    });
+    return;
   }
+
+  const { following, followers, ...safeUserData } = targetUser;
+
+  res.status(200).json({
+    profile: safeUserData,
+    success: 'Profile fetched successfully!',
+    type: targetUser?.profileType,
+    isFollowing: 'FALSE',
+  });
+  return;
 };
 
 export const toggleProfileType = async (

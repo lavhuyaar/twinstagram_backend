@@ -43,26 +43,27 @@ export const newFollowRequest = async (
   // Checks if targetUserId is valid
   const existingTargetUser = await getUserById(targetUserId);
 
+  
   if (!existingTargetUser) {
     res.status(404).json({
       error: 'Failed to send follow request as target user is not found!',
     });
     return;
   }
-
+  
   // Checks if there already exists a follow request from User to targetUser
   const isExistingRequest = await getRequestByTargetUserId(
     userId,
     targetUserId,
   );
-
+  
   if (isExistingRequest) {
     res.status(409).json({
       error: 'This follow request already exists!',
     });
     return;
   }
-
+  
   const request = await createNewRequest(
     userId,
     targetUserId,
@@ -73,6 +74,7 @@ export const newFollowRequest = async (
     request,
     success: 'Follow request sent successfully!',
   });
+  return;
 };
 
 export const acceptRequest = async (
