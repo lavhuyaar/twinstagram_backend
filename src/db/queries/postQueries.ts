@@ -42,12 +42,37 @@ export const updatePost = async (
     data: {
       content,
     },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+      likes: {
+        where: {
+          id: userId,
+        },
+      },
+      _count: true,
+    },
   });
 
   return post;
 };
 
 export const removePost = async (id: string, userId: string) => {
+  await db.subComment.deleteMany({
+    where: {
+      postId: id,
+    },
+  });
+
+  await db.comment.deleteMany({
+    where: {
+      postId: id,
+    },
+  });
+
   await db.post.delete({
     where: {
       id,
