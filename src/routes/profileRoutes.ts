@@ -4,6 +4,7 @@ import { verifyToken } from '../middlewares/verifyToken';
 import { verifyUser } from '../middlewares/verifyUser';
 import {
   editProfile,
+  getAllProfiles,
   getProfile,
   toggleProfileType,
 } from '../controllers/profileController';
@@ -17,5 +18,6 @@ profileRoutes.use(verifyUser);
 profileRoutes.put('/', upload.single('profilePicture'), editProfile);
 profileRoutes.get('/:targetUserId', getProfile);
 profileRoutes.put('/type/toggle', toggleProfileType);
+profileRoutes.get('/users/all', getAllProfiles);
 
 export default profileRoutes;

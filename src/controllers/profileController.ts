@@ -5,6 +5,7 @@ import { CustomRequest } from '../types/CustomRequest';
 import supabase from '../supabase/supabase';
 import { validateProfile } from '../validators/profileValidator';
 import {
+  getAllUsers,
   getUserById,
   isUsernameAvailable,
   updateProfileType,
@@ -206,6 +207,38 @@ export const toggleProfileType = async (
         ? 'Private Mode enabled successfully!'
         : 'Private Mode disabled successfully!',
     user: updatedUser,
+  });
+  return;
+};
+
+export const getAllProfiles = async (
+  req: CustomRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { userId } = req;
+
+  if (!userId) {
+    res.status(403).json({
+      error: 'Unauthorized Action!',
+    });
+    return;
+  }
+
+  const search = req.query.search as string;
+
+  const users = await getAllUsers(userId, search);
+
+  if (!users) {
+    res.status(400).json({
+      error: 'Failed to fetch users',
+    });
+    return;
+  }
+
+  res.status(200).json({
+    users,
+    success: 'User profiles fetched successfully!',
   });
   return;
 };

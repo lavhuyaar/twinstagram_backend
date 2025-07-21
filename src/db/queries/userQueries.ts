@@ -173,3 +173,53 @@ export const updateProfileType = async (
 
   return user;
 };
+
+export const getAllUsers = async (userId: string, search = '') => {
+  const users = await db.user.findMany({
+    where: {
+      AND: [
+        {
+          NOT: {
+            id: userId,
+          },
+        },
+        {
+          OR: [
+            {
+              username: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              firstName: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+            {
+              lastName: {
+                contains: search,
+                mode: 'insensitive',
+              },
+            },
+          ],
+        },
+      ],
+    },
+    include: {
+      followers: {
+        where: {
+          requestByUserId: userId,
+        },
+      },
+    },
+    omit: {
+      password: true,
+      createdAt: true,
+      updatedAt: true,
+    },
+  });
+
+  return users;
+};
