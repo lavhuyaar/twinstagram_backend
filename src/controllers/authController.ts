@@ -103,7 +103,7 @@ export const loginUser = [
     res
       .status(200)
       .cookie('token', token, {
-        sameSite: 'strict',
+        sameSite: 'none',
         secure: true,
         httpOnly: true,
         maxAge: 6 * 24 * 60 * 60 * 1000,
