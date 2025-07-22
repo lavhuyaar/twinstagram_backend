@@ -36,20 +36,22 @@ This is the backend for **Twinstagram**, a full-stack social media app inspired 
 
 ---
 
-##  Project Structure
+## Project Structure
 
-├──prisma/                  # Prisma models and migrations
+```bash
+├──prisma/                 # Prisma models and migrations
 ├──src/
-    ├── controllers/        # Request handlers
-    ├── db/                    # Prisma client and custom queries
-    ├── middlewares/    # Auth, error handling, validation
-    ├── routes/              # Route definitions
-    ├── tests/                # Unit tests
-    ├── types/               # Custom TypeScript types
+    ├── controllers/       # Request handlers
+    ├── db/                # Prisma client and custom queries
+    ├── middlewares/       # Auth, error handling, validation
+    ├── routes/            # Route definitions
+    ├── tests/             # Unit tests
+    ├── types/             # Custom TypeScript types
     ├── validators/        # Validation schemas
-    ├── utils/                 # Utility functions
-    ├── app.ts               # App entry point
+    ├── utils/             # Utility functions
+    ├── app.ts             # App entry point
     └── server.ts
+```
 
 ---
 
