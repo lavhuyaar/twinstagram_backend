@@ -103,8 +103,8 @@ export const loginUser = [
     res
       .status(200)
       .cookie('token', token, {
-        sameSite: 'strict', //Only to be un-commented after the FE is deployed
-        // secure: true,
+        sameSite: 'strict',
+        secure: true,
         httpOnly: true,
         maxAge: 6 * 24 * 60 * 60 * 1000,
       }) //Http only cookie
