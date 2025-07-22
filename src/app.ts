@@ -10,16 +10,24 @@ app.use(express.urlencoded());
 app.use(express.json());
 app.use(cookieParser());
 
-const allowedLists: (string | undefined)[] = ['https://twinstagram.vercel.app']; //Add allowed lists
+const allowedOrigins: (string | undefined)[] = [
+  'https://twinstagram.vercel.app',
+];
 
 const corsOptionsDelegate = (req: Request, callback: Function) => {
-  let corsOptions;
-  if (allowedLists.indexOf(req.header('Origin')) !== -1) {
-    corsOptions = { origin: true, credentials: true };
+  const origin = req.header('Origin');
+
+  if (origin && allowedOrigins.includes(origin)) {
+    callback(null, {
+      origin: true,
+      credentials: true,
+      optionsSuccessStatus: 200,
+    });
   } else {
-    corsOptions = { origin: false };
+    callback(null, {
+      origin: false,
+    });
   }
-  callback(null, corsOptions);
 };
 
 app.use(cors(corsOptionsDelegate));
