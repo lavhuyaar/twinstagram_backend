@@ -53,7 +53,7 @@ export const newComment = [
       : await createNewComment(content, userId, postId);
 
     if (!comment) {
-      res.status(401).json({
+      res.status(400).json({
         error: 'Failed to create comment!',
       });
       return;
@@ -104,7 +104,7 @@ export const editComment = [
     const editedComment = await updateComment(commentId, content);
 
     if (!editedComment) {
-      res.status(401).json({
+      res.status(400).json({
         error: 'Failed to edit comment!',
       });
       return;
@@ -291,7 +291,7 @@ export const editSubComment = [
     const editedComment = await updateSubComment(commentId, content);
 
     if (!editedComment) {
-      res.status(401).json({
+      res.status(400).json({
         error: 'Failed to edit comment!',
       });
       return;

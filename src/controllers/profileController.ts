@@ -12,7 +12,6 @@ import {
   updateUser,
 } from '../db/queries/userQueries';
 import { isRequestSent } from '../db/queries/followQueries';
-import { Follow } from '@prisma/client';
 
 export const editProfile = [
   ...validateProfile,
@@ -102,7 +101,7 @@ export const editProfile = [
     );
 
     if (!updatedProfile) {
-      res.status(401).json({
+      res.status(400).json({
         error: 'Failed to update Profile!',
       });
       return;

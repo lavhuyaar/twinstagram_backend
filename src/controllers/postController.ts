@@ -73,7 +73,7 @@ export const newPost = [
     const post = await createNewPost(userId, content, imageURL, imageId);
 
     if (!post) {
-      res.status(401).json({
+      res.status(400).json({
         error: 'Failed to create post!',
       });
       return;
